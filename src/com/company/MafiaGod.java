@@ -4,7 +4,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class MafiaGod {
+public class MafiaGod implements Runnable {
 
     public MafiaGod(ArrayList<Socket> clients){
 
@@ -56,7 +56,12 @@ public class MafiaGod {
 
         for(Socket s : sockets){
             players.add(new PlayerHandler(s,Role.CITIZEN));
+            sockets.remove(s);
         }
+    }
+
+    @Override
+    public void run() {
 
     }
 }
