@@ -13,15 +13,19 @@ public class Client {
             Socket client = new Socket("localhost",Integer.parseInt(keyboard.readLine()));
             BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
             PrintWriter writer = new PrintWriter(client.getOutputStream(),true);
+            ClientReader clientReader = new ClientReader(reader);
+            ClientWriter clientWriter = new ClientWriter(keyboard, writer);
+            clientWriter.start();
+            clientReader.start();
         }catch (IOException e){
             e.printStackTrace();
         }
     }
 
-    public class ClientReader extends Thread{
-        BufferedReader reader;
+    public static class ClientReader extends Thread{
+        private BufferedReader reader;
 
-        public ClientReader(BufferedReader reader) {
+        public ClientReader(BufferedReader reader){
             this.reader = reader;
         }
 
@@ -31,6 +35,28 @@ public class Client {
                 while (true){
                     String response = reader.readLine();
                     System.out.println(response);
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static class ClientWriter extends Thread{
+        private BufferedReader keyboard;
+        private PrintWriter writer;
+
+        public ClientWriter(BufferedReader br,PrintWriter pw){
+            keyboard = br;
+            writer = pw;
+        }
+
+        @Override
+        public void run(){
+            try {
+                while (true){
+                    String request = keyboard.readLine();
+                    writer.println(request);
                 }
             }catch (IOException e){
                 e.printStackTrace();

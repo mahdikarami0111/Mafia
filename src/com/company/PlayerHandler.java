@@ -25,7 +25,7 @@ public class PlayerHandler {
             printWriter = new PrintWriter(s.getOutputStream(),true);
             action = Executors.newSingleThreadExecutor();
             this.client = s;
-            this.name = null;
+            this.name = "";
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -40,6 +40,45 @@ public class PlayerHandler {
             p.receiveMessage("["+name+"] "+m);
         }
     }
+
+    public void printAlive(){
+        for(PlayerHandler p : List.list()){
+            if(p.getState().status == Status.ALIVE){
+                printWriter.println(p.getName());
+            }
+        }
+    }
+
+    public PlayerHandler getPlayer(String name){
+        for(PlayerHandler p :List.list()){
+            if(p.getName().equals(name) && p.getState().status == Status.ALIVE){
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public PlayerStatus getState() {
+        return state;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Future<?> vote(){
+        return action.submit(new Vote(bufferReader,printWriter));
+    }
+
+    public Future<?> chat(){
+        return action.submit(new Chat(bufferReader,printWriter));
+    }
+
+    public Future<?> intro(){return  action.submit(new Intro(bufferReader,printWriter)); }
 
     private class Chat implements Runnable{
         private BufferedReader reader;
@@ -101,62 +140,27 @@ public class PlayerHandler {
         public void run() {
             try {
                 writer.println("please enter your name :");
+                writer.println("are you listening cunt ?");
                 String name = reader.readLine();
-                while (getName() == null){
-                    boolean rep = false;
-                    for (PlayerHandler p : List.list()){
-                        if(p.name.equals(name)){
-                            rep = true;
-                            writer.println("invalid name try again");
-                            name = reader.readLine();
-                            break;
-                        }
-                    }
-                    if(!rep){
-                        setName(name);
-                    }
+
+                while (!isNameValid(name)){
+                    writer.println("invalid name");
+                    name = reader.readLine();
                 }
+                setName(name);
+                writer.println("name accepted");
+
             }catch (IOException e){
                 e.printStackTrace();
             }
         }
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Future<?> vote(){
-        return action.submit(new Vote(bufferReader,printWriter));
-    }
-
-    public Future<?> chat(){
-        return action.submit(new Chat(bufferReader,printWriter));
-    }
-
-    public void printAlive(){
+    public boolean isNameValid(String name){
         for(PlayerHandler p : List.list()){
-            if(p.getState().status == Status.ALIVE){
-                printWriter.println(p.getName());
-            }
+            if(p.name.equals(name))return false;
         }
-    }
-
-    public PlayerHandler getPlayer(String name){
-        for(PlayerHandler p :List.list()){
-            if(p.getName().equals(name) && p.getState().status == Status.ALIVE){
-                return p;
-            }
-        }
-        return null;
-    }
-
-    public PlayerStatus getState() {
-        return state;
-    }
-
-    public String getName() {
-        return name;
+        return true;
     }
 
     public class PlayerStatus{

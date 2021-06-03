@@ -3,15 +3,19 @@ package com.company;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.Future;
 
-public class MafiaGod implements Runnable {
+public class MafiaGod {
+
+    private ArrayList<PlayerHandler> players;
 
     public MafiaGod(ArrayList<Socket> clients){
-
+        players = new ArrayList<>();
+        distributeTest(clients);
+        List.init(players);
     }
 
-    public void distribute(ArrayList<Socket> sockets,int count){
-        ArrayList<PlayerHandler> players = new ArrayList<>();
+    public void  distribute(ArrayList<Socket> sockets,int count){
         Random r = new Random();
         int i = 0;
         int index = 0;
@@ -60,8 +64,32 @@ public class MafiaGod implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
+    public void distributeTest(ArrayList<Socket> sockets){
+        players.add(new PlayerHandler(sockets.get(0),Role.CITIZEN));
+        players.add(new PlayerHandler(sockets.get(1),Role.CITIZEN));
+        players.add(new PlayerHandler(sockets.get(2),Role.CITIZEN));
+    }
 
+
+    public void run() {
+        ArrayList<Future<?>> done = new ArrayList<>();
+        for(PlayerHandler p : players){
+            done.add(p.intro());
+        }
+        while (!allDone(done)){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("all done");
+    }
+
+    public boolean allDone(ArrayList<Future<?>> futures){
+        for (Future<?> f : futures){
+            if(!f.isDone()){return false;}
+        }
+        return true;
     }
 }
