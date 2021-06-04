@@ -3,6 +3,7 @@ package com.company;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class MafiaGod {
@@ -66,8 +67,9 @@ public class MafiaGod {
 
     public void distributeTest(ArrayList<Socket> sockets){
         players.add(new PlayerHandler(sockets.get(0),Role.CITIZEN));
-        players.add(new PlayerHandler(sockets.get(1),Role.CITIZEN));
-        players.add(new PlayerHandler(sockets.get(2),Role.CITIZEN));
+        PlayerHandler p = new Mafia(sockets.get(1));
+        players.add(p);
+        players.add(new Godfather(sockets.get(2)));
     }
 
 
@@ -83,7 +85,39 @@ public class MafiaGod {
                 e.printStackTrace();
             }
         }
-        System.out.println("all done");
+        done.clear();
+        ((Mafia)players.get(1)).mafiaIntro();
+        ((Godfather)players.get(2)).mafiaIntro();
+        done.add(((Mafia)players.get(1)).kill());
+        done.add(((Godfather)players.get(2)).kill());
+        while (! allDone(done)){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            System.out.println(((PlayerHandler)done.get(1).get()).getName());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+//        System.out.println("starting chatting");
+//        done.clear();
+//        for(PlayerHandler p : players){
+//            done.add(p.chat());
+//        }
+//        try {
+//            Thread.sleep(15000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        for(Future<?> f : done){
+//            System.out.println("cancelling tasks");
+//            f.cancel(true);
+//        }
     }
 
     public boolean allDone(ArrayList<Future<?>> futures){

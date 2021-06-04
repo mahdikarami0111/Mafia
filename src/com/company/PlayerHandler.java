@@ -37,13 +37,14 @@ public class PlayerHandler {
 
     public void sendMessage(String m){
         for (PlayerHandler p : List.list()){
+            if (p == this)continue;
             p.receiveMessage("["+name+"] "+m);
         }
     }
 
     public void printAlive(){
         for(PlayerHandler p : List.list()){
-            if(p.getState().status == Status.ALIVE){
+            if(p.getState().status == Status.ALIVE || p.getState().status == Status.SHOT){
                 printWriter.println(p.getName());
             }
         }
@@ -70,90 +71,84 @@ public class PlayerHandler {
         this.name = name;
     }
 
-    public Future<?> vote(){
-        return action.submit(new Vote(bufferReader,printWriter));
-    }
-
-    public Future<?> chat(){
-        return action.submit(new Chat(bufferReader,printWriter));
-    }
-
-    public Future<?> intro(){return  action.submit(new Intro(bufferReader,printWriter)); }
-
-    private class Chat implements Runnable{
-        private BufferedReader reader;
-        private PrintWriter writer;
-
-        public Chat(BufferedReader reader, PrintWriter writer) {
-            this.reader = reader;
-            this.writer = writer;
+    public PlayerHandler getGodfather(){
+        for(PlayerHandler p : List.list()){
+            if(p.getState().role == Role.GODFATHER){
+                return p;
+            }
         }
+        return null;
+    }
 
-        @Override
-        public void run() {
-            while (true){
+    public void sendMessage(String m,PlayerHandler p){
+        p.receiveMessage(m);
+    }
+
+    public Future<?> vote(){
+        Runnable vote = new Runnable() {
+            @Override
+            public void run() {
+                printAlive();
+                printWriter.println("who do you want to vote ?");
                 try {
-                    sendMessage(reader.readLine());
+                    String name = bufferReader.readLine();
+                    PlayerHandler p = getPlayer(name);
+                    while (p == null){
+                        printWriter.println("Invalid name try again");
+                        p = getPlayer(bufferReader.readLine());
+                    }
+                    p.getState().votes +=1;
                 }catch (IOException e){
                     e.printStackTrace();
                 }
             }
-        }
+        };
+        return action.submit(vote);
     }
 
-    private class Vote implements Runnable{
-        private BufferedReader reader;
-        private PrintWriter writer;
-
-        public Vote(BufferedReader reader, PrintWriter writer) {
-            this.reader = reader;
-            this.writer = writer;
-        }
-
-        @Override
-        public void run() {
-            printAlive();
-            try {
-                String name = reader.readLine();
-                PlayerHandler p = getPlayer(name);
-                while (p == null){
-                    writer.println("Invalid name try again");
-                    p = getPlayer(reader.readLine());
+    public Future<?> chat(){
+        Runnable chat = new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()){
+                    try {
+                        sendMessage(bufferReader.readLine());
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }
-                p.getState().votes +=1;
-            }catch (IOException e){
-                e.printStackTrace();
             }
-        }
+        };
+
+        return action.submit(chat);
     }
 
-    private class Intro implements Runnable{
-        private BufferedReader reader;
-        private PrintWriter writer;
+    public Future<?> intro(){
+        Runnable intro = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    printWriter.println("please enter your name :");
+                    printWriter.println("are you listening cunt ?");
+                    String name = bufferReader.readLine();
 
-        public Intro(BufferedReader reader, PrintWriter writer) {
-            this.reader = reader;
-            this.writer = writer;
-        }
+                    while (!isNameValid(name)){
+                        printWriter.println("invalid name");
+                        name = bufferReader.readLine();
+                    }
+                    setName(name);
+                    printWriter.println("name accepted");
 
-        @Override
-        public void run() {
-            try {
-                writer.println("please enter your name :");
-                writer.println("are you listening cunt ?");
-                String name = reader.readLine();
+                    printWriter.println("tell me when you are ready to start the game");
+                    bufferReader.readLine();
+                    printWriter.println("OK waiting for other players to ready up");
 
-                while (!isNameValid(name)){
-                    writer.println("invalid name");
-                    name = reader.readLine();
+                }catch (IOException e){
+                    e.printStackTrace();
                 }
-                setName(name);
-                writer.println("name accepted");
-
-            }catch (IOException e){
-                e.printStackTrace();
             }
-        }
+        };
+        return  action.submit(intro);
     }
 
     public boolean isNameValid(String name){
@@ -174,5 +169,17 @@ public class PlayerHandler {
             votes = 0;
         }
 
+    }
+
+    public BufferedReader getBufferReader() {
+        return bufferReader;
+    }
+
+    public PrintWriter getPrintWriter() {
+        return printWriter;
+    }
+
+    public ExecutorService getAction() {
+        return action;
     }
 }
