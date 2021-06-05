@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class MafiaDoctor extends PlayerHandler {
-    private PlayerStatus state;
+
     private BufferedReader bufferReader;
     private PrintWriter printWriter;
     private ExecutorService action;
@@ -18,7 +18,6 @@ public class MafiaDoctor extends PlayerHandler {
 
     public MafiaDoctor(Socket s){
         super(s,Role.MAFIA);
-        this.state = super.getState();
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
@@ -31,7 +30,6 @@ public class MafiaDoctor extends PlayerHandler {
         Runnable intro = new Runnable() {
             @Override
             public void run() {
-                printWriter.println("you are Mafia Doctor");
                 String mafia = "";
                 for(PlayerHandler p : List.list()){
                     if(p.getState().role == Role.GODFATHER){

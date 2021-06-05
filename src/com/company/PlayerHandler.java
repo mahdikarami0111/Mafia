@@ -93,7 +93,7 @@ public class PlayerHandler {
                 try {
                     String name = bufferReader.readLine();
                     PlayerHandler p = getPlayer(name);
-                    while (p == null){
+                    while (p == null || p.getState().status == Status.DEAD){
                         printWriter.println("Invalid name try again");
                         p = getPlayer(bufferReader.readLine());
                     }
@@ -110,11 +110,51 @@ public class PlayerHandler {
         Runnable chat = new Runnable() {
             @Override
             public void run() {
-                while (!Thread.currentThread().isInterrupted()){
-                    try {
-                        sendMessage(bufferReader.readLine());
-                    }catch (IOException e){
-                        e.printStackTrace();
+
+                if(!getState().silence){
+                    boolean over = false;
+                    while (!Thread.currentThread().isInterrupted()){
+                        try {
+                            while (!bufferReader.ready()){
+                                if(Thread.currentThread().isInterrupted()){
+                                    over = true;
+                                    break;
+                                }
+                                Thread.sleep(100);
+                            }
+                            if(over){
+                                break;
+                            }
+                            sendMessage(bufferReader.readLine());
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }catch (InterruptedException x){
+                            break;
+                        }
+                    }
+                }
+
+                else{
+                    boolean over = false;
+                    while (!Thread.currentThread().isInterrupted()){
+                        try {
+                            while (!bufferReader.ready()){
+                                if(Thread.currentThread().isInterrupted()){
+                                    over = true;
+                                    break;
+                                }
+                                Thread.sleep(100);
+                            }
+                            if(over){
+                                break;
+                            }
+                            bufferReader.readLine();
+                            printWriter.println("you are silenced you can not chat for one day");
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }catch (InterruptedException x){
+                            break;
+                        }
                     }
                 }
             }
@@ -162,11 +202,13 @@ public class PlayerHandler {
         public Role role;
         public Status status;
         public int votes;
+        public boolean silence;
 
         public PlayerStatus(Role role){
             this.role = role;
             status = Status.ALIVE;
             votes = 0;
+            silence = false;
         }
 
     }

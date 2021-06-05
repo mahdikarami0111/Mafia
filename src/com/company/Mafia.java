@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 
 public class Mafia extends PlayerHandler{
 
-    private PlayerStatus state;
     private BufferedReader bufferReader;
     private PrintWriter printWriter;
     private ExecutorService action;
@@ -17,7 +16,6 @@ public class Mafia extends PlayerHandler{
 
     public Mafia(Socket s){
         super(s,Role.MAFIA);
-        this.state = super.getState();
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
@@ -55,7 +53,6 @@ public class Mafia extends PlayerHandler{
         Runnable intro = new Runnable() {
             @Override
             public void run() {
-                printWriter.println("you are Mafia");
                 String mafia = "";
                 for(PlayerHandler p : List.list()){
                     if(p.getState().role == Role.GODFATHER){

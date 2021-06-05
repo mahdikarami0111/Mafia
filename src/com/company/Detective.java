@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class Detective extends PlayerHandler{
-    private PlayerStatus state;
+
     private BufferedReader bufferReader;
     private PrintWriter printWriter;
     private ExecutorService action;
@@ -16,7 +16,6 @@ public class Detective extends PlayerHandler{
 
     public Detective(Socket s){
         super(s,Role.MAFIA);
-        this.state = super.getState();
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
@@ -29,7 +28,7 @@ public class Detective extends PlayerHandler{
             public void run() {
                 printAlive();
                 try{
-                    printWriter.println("whome do you want to investigate ?");
+                    printWriter.println("whom do you want to investigate ?");
                     String s = bufferReader.readLine();
                     while (getPlayer(s).getState().status == Status.DEAD){
                         printWriter.println("invalid name try again");

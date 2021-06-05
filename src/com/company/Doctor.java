@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class Doctor extends PlayerHandler{
-    private PlayerStatus state;
+
     private BufferedReader bufferReader;
     private PrintWriter printWriter;
     private ExecutorService action;
@@ -18,7 +18,6 @@ public class Doctor extends PlayerHandler{
 
     public Doctor(Socket s){
         super(s,Role.MAFIA);
-        this.state = super.getState();
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
