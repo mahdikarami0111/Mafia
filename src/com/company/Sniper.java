@@ -15,7 +15,7 @@ public class Sniper extends PlayerHandler{
     private Sniper snip;
 
     public Sniper(Socket s){
-        super(s,Role.GODFATHER);
+        super(s,Role.SNIPER);
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
@@ -27,7 +27,6 @@ public class Sniper extends PlayerHandler{
         Runnable shoot = new Runnable() {
             @Override
             public void run() {
-                printAlive();
                 try {
                     printWriter.println("do you want to shoot someone ?");
                     String answer = bufferReader.readLine();
@@ -44,6 +43,8 @@ public class Sniper extends PlayerHandler{
                         }else {
                             snip.getState().status = Status.SHOT;
                         }
+                    }else {
+                        printWriter.println("Ok maybe next time");
                     }
                 }catch (IOException e){
                     e.printStackTrace();

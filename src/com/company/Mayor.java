@@ -16,11 +16,12 @@ public class Mayor extends PlayerHandler{
     private boolean cancel;
 
     public Mayor(Socket s){
-        super(s,Role.GODFATHER);
+        super(s,Role.MAYOR);
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
         this.action = super.getAction();
+        this.cancel = false;
     }
 
     public Future<?> verify(){
@@ -28,6 +29,7 @@ public class Mayor extends PlayerHandler{
             @Override
             public void run() {
                 try {
+                    cancel = false;
                     printWriter.println("do you want to cancel voting");
                     String answer = bufferReader.readLine();
                     if(answer.toUpperCase().equals("YES")){
@@ -38,6 +40,10 @@ public class Mayor extends PlayerHandler{
                 }
             }
         };
-        return action.submit(verify,cancel);
+        return action.submit(verify);
+    }
+
+    public boolean isCancel() {
+        return cancel;
     }
 }

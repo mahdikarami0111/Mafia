@@ -15,7 +15,7 @@ public class Detective extends PlayerHandler{
     private String name;
 
     public Detective(Socket s){
-        super(s,Role.MAFIA);
+        super(s,Role.DETECTIVE);
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();

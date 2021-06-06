@@ -24,6 +24,7 @@ public class Bulletproof extends PlayerHandler{
                     if(getBufferReader().readLine().toUpperCase().equals("YES") && investigateCount<2){
                         for(PlayerHandler p : List.list()){
                             if(p.getState().status == Status.DEAD){
+                                getPrintWriter().println("dead roles are :");
                                 getPrintWriter().println(p.getState().role);
                             }
                         }
@@ -37,5 +38,13 @@ public class Bulletproof extends PlayerHandler{
             }
         };
         return getAction().submit(r);
+    }
+
+    public int getDeathCount() {
+        return deathCount;
+    }
+
+    public void setDeathCount(int deathCount) {
+        this.deathCount = deathCount;
     }
 }

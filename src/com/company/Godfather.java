@@ -44,7 +44,16 @@ public class Godfather extends PlayerHandler{
                }catch (IOException e){
                    e.printStackTrace();
                }
-               getPlayer(s).getState().status = Status.SHOT;
+               if(getPlayer(s).getState().role == Role.BULLETPROOF){
+                   Bulletproof bulletproof = (Bulletproof)getPlayer(s);
+                   if(bulletproof.getDeathCount() == 1){
+                       bulletproof.setDeathCount(0);
+                   }else if(bulletproof.getDeathCount() == 0){
+                       bulletproof.getState().status = Status.SHOT;
+                   }
+               }else {
+                   getPlayer(s).getState().status = Status.SHOT;
+               }
            }
        };
        return action.submit(kill);

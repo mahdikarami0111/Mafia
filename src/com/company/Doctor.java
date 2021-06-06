@@ -17,7 +17,7 @@ public class Doctor extends PlayerHandler{
     private Doctor doc;
 
     public Doctor(Socket s){
-        super(s,Role.MAFIA);
+        super(s,Role.DOCTOR);
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
@@ -38,11 +38,12 @@ public class Doctor extends PlayerHandler{
                         printWriter.println("invalid name try again");
                         s = bufferReader.readLine();
                     }
-                    if(getPlayer(s).getState().status == Status.SHOT){
+                    if(getPlayer(s).getState().status == Status.SHOT && getPlayer(s) != doc){
                         getPlayer(s).getState().status = Status.ALIVE;
                     }
                     if(getPlayer(s) == doc){
                         selfCounter = 1;
+                        doc.getState().status = Status.ALIVE;
                     }
                 }catch (IOException e){
                     e.printStackTrace();

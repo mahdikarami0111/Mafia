@@ -38,8 +38,9 @@ public class Mafia extends PlayerHandler{
                                 getPlayer(s).getState().role != Role.MAFIA_DOCTOR){
                             break;
                         }
+                        printWriter.println("invalid name try again");
                     }
-                    String m = name + " suggests killing "+s;
+                    String m = getName() + " suggests killing "+s;
                     sendMessage(m,getGodfather());
                 }catch (IOException e){
                     e.printStackTrace();

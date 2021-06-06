@@ -23,8 +23,10 @@ public class MafiaGod {
     private ArrayList<PlayerHandler> citizens;
 
     public MafiaGod(ArrayList<Socket> clients){
+        mafia = new ArrayList<>();
+        citizens = new ArrayList<>();
         players = new ArrayList<>();
-        distributeTest(clients);
+        distribute(clients,10);
         List.init(players);
     }
 
@@ -32,13 +34,11 @@ public class MafiaGod {
         Random r = new Random();
         int i = 0;
         int index = 0;
-        for(i = 0 ; i<(count/3)-2 ; i++){
-            index = r.nextInt(sockets.size()-1);
-            Mafia p = new Mafia(sockets.get(index));
-            mafia.add(p);
-            sockets.remove(index);
-            players.add(p);
-        }
+        index = r.nextInt(sockets.size()-1);
+        Mafia m = new Mafia(sockets.get(index));
+        mafia.add(m);
+        players.add(m);
+        sockets.remove(index);
 
         index = r.nextInt(sockets.size()-1);
         players.add(mafiaDoctor = new MafiaDoctor(sockets.get(index)));
@@ -76,7 +76,6 @@ public class MafiaGod {
             PlayerHandler p = new PlayerHandler(s,Role.CITIZEN);
             players.add(p);
             citizens.add(p);
-            sockets.remove(s);
         }
     }
 
@@ -91,15 +90,22 @@ public class MafiaGod {
         intro();
         roleDeclaration();
         introduceMafia();
-        sendToAll("Ok it is night now");
-        mafiaKill();
-        sniperShoot();
-        doctorLectur();
-        doctorHeal();
-        psychology();
-        bulletDetect();
-        concludeNight();
-        voting();
+        sendToAll("GAME STARTED");
+        while (!gameOver()){
+            sendToAll("Ok it is night now");
+            mafiaKill();
+            sendToAll("mafia killed someone");
+            sniperShoot();
+            doctorLectur();
+            doctorHeal();
+            psychology();
+            bulletDetect();
+            detectiveDetect();
+            sendToAll("OK its day now wake up");
+            concludeNight();
+            startChatting();
+            voting();
+        }
     }
 
     public void mayorVote(){
@@ -109,10 +115,27 @@ public class MafiaGod {
         }
     }
 
+    public boolean gameOver(){
+        int mafiaCount = 0;
+        int citizenCount = 0;
+        for(PlayerHandler p :players){
+            if(p.getState().status == Status.ALIVE){
+                Role r = p.getState().role;
+                if(r == Role.MAFIA || r == Role.MAFIA_DOCTOR || r == Role.GODFATHER){
+                    mafiaCount++;
+                }else {
+                    citizenCount ++;
+                }
+            }
+        }
+        return (citizenCount <= mafiaCount);
+    }
+
     public void concludeNight(){
         for (PlayerHandler p : players){
             if(p.getState().status == Status.SHOT){
                 p.getState().status = Status.DEAD;
+                p.getState().silence = true;
                 sendToAll("Last night " +p.getName()+" died, rest in peace my nigga");
             }
         }
@@ -139,54 +162,60 @@ public class MafiaGod {
         sendToAll("Result of voting is : " + max.getName());
         if(mayor.getState().status == Status.ALIVE){
             sendToAll("Mayor wake up and to yor thing");
-            Future<?> result = mayor.verify();
-            try {
-                if ((boolean)result.get()){
-                    System.out.println("Yes");
-                }
-            }catch (ExecutionException | InterruptedException e){
-                e.printStackTrace();
+            wait(mayor.verify());
+
+            if(mayor.isCancel()){
+                sendToAll("Mayor cancelled voting");
             }
+            else {
+                sendToAll("Mayor did not cancel voting "+max.getName()+" died");
+                max.getState().status = Status.DEAD;
+                max.getState().silence = true;
+            }
+        }else {
+            sendToAll(max.getName()+" died");
+            max.getState().status = Status.DEAD;
+            max.getState().silence = true;
         }
     }
 
     public void bulletDetect(){
-        if(bulletproof.getState().status == Status.ALIVE){
+        if(bulletproof.getState().status != Status.DEAD){
             sendToAll("Bulletproof wake up");
             wait(bulletproof.deadInvestigate());
         }
     }
 
     public void psychology(){
-        if(psychologist.getState().status == Status.ALIVE){
+        if(psychologist.getState().status != Status.DEAD){
             sendToAll("Psychologist wake up");
             wait(psychologist.silence());
         }
     }
 
     public void detectiveDetect(){
-        if(detective.getState().status == Status.ALIVE){
+        if(detective.getState().status != Status.DEAD){
             sendToAll("Detective wake up and investigate");
             wait(detective.investigate());
         }
     }
 
     public void doctorHeal(){
-        if(doctor.getState().status == Status.ALIVE){
+        if(doctor.getState().status != Status.DEAD){
             sendToAll("Doctor wake up and heal someone");
             wait(doctor.heal());
         }
     }
 
     public void doctorLectur(){
-        if(mafiaDoctor.getState().status == Status.ALIVE){
+        if(mafiaDoctor.getState().status != Status.DEAD){
             sendToAll("Doctor lectur wake up and heal someone");
             wait(mafiaDoctor.heal());
         }
     }
 
     public void sniperShoot(){
-        if(sniper.getState().status == Status.ALIVE){
+        if(sniper.getState().status != Status.DEAD){
             sendToAll("Sniper wake up");
             wait(sniper.shoot());
         }
@@ -233,13 +262,14 @@ public class MafiaGod {
     }
 
     public void startChatting(){
+        sendToAll("chatting started");
         ArrayList<Future<?>> done = new ArrayList<>();
         System.out.println("starting chatting");;
         for(PlayerHandler p : players){
             done.add(p.chat());
         }
         try {
-            Thread.sleep(15000);
+            Thread.sleep(60000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

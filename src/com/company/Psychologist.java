@@ -14,7 +14,7 @@ public class Psychologist extends PlayerHandler{
     private String name;
 
     public Psychologist(Socket s){
-        super(s,Role.GODFATHER);
+        super(s,Role.PSYCHOLOGIST);
         this.name = super.getName();
         this.bufferReader = super.getBufferReader();
         this.printWriter = super.getPrintWriter();
@@ -36,6 +36,7 @@ public class Psychologist extends PlayerHandler{
                             printWriter.println("Invalid name try again");
                             s = bufferReader.readLine();
                         }
+                        getPlayer(s).getState().silence = true;
                     }
                 }catch (IOException e){
                     e.printStackTrace();

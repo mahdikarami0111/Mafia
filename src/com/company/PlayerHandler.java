@@ -52,7 +52,7 @@ public class PlayerHandler {
 
     public PlayerHandler getPlayer(String name){
         for(PlayerHandler p :List.list()){
-            if(p.getName().equals(name) && p.getState().status == Status.ALIVE){
+            if(p.getName().equals(name)){
                 return p;
             }
         }
@@ -134,7 +134,7 @@ public class PlayerHandler {
                     }
                 }
 
-                else{
+                else if(getState().silence){
                     boolean over = false;
                     while (!Thread.currentThread().isInterrupted()){
                         try {
@@ -149,11 +149,15 @@ public class PlayerHandler {
                                 break;
                             }
                             bufferReader.readLine();
-                            printWriter.println("you are silenced you can not chat for one day");
+                            printWriter.println("you are silenced you can not chat");
                         }catch (IOException e){
                             e.printStackTrace();
                         }catch (InterruptedException x){
                             break;
+                        }finally {
+                            if(getState().status == Status.ALIVE){
+                                getState().silence = false;
+                            }
                         }
                     }
                 }
@@ -169,7 +173,6 @@ public class PlayerHandler {
             public void run() {
                 try {
                     printWriter.println("please enter your name :");
-                    printWriter.println("are you listening cunt ?");
                     String name = bufferReader.readLine();
 
                     while (!isNameValid(name)){

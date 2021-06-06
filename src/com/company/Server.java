@@ -13,7 +13,7 @@ public class Server {
         try {
             ServerSocket server = new ServerSocket(8080);
             ArrayList<Socket> sockets = new ArrayList<>();
-            for(int i = 0; i<3;i++){
+            for(int i = 0; i<10;i++){
                 sockets.add(server.accept());
                 System.out.println("new player added");
             }
