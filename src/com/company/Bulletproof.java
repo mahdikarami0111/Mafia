@@ -19,21 +19,27 @@ public class Bulletproof extends PlayerHandler{
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                getPrintWriter().println("do you want to investigate dead players ?");
-                try {
-                    if(getBufferReader().readLine().toUpperCase().equals("YES") && investigateCount<2){
-                        for(PlayerHandler p : List.list()){
-                            if(p.getState().status == Status.DEAD){
-                                getPrintWriter().println("dead roles are :");
-                                getPrintWriter().println(p.getState().role);
+                if(investigateCount<2){
+                    getPrintWriter().println("[Server] do you want to investigate dead players ?");
+                    try {
+                        if(getBufferReader().readLine().toUpperCase().equals("YES")){
+                            getPrintWriter().println("[Server] Dead roles are : ");
+                            sendAnonymousMessage("[Server] Bulletproof asked for dead roles : ");
+                            for(PlayerHandler p : List.list()){
+                                if(p.getState().status == Status.DEAD){
+                                    getPrintWriter().println(p.getState().role);
+                                    sendAnonymousMessage((p.getState().role).toString());
+                                }
                             }
+                            investigateCount++;
+                        }else {
+                            getPrintWriter().println("[Server] Ok maybe next time");
                         }
-                        investigateCount++;
-                    }else if(investigateCount<2) {
-                        getPrintWriter().println("Ok maybe next time");
+                    }catch (IOException e){
+                        System.out.println("Client "+getName()+" connection is lost");
+                        getState().status = Status.DEAD;
+                        getState().silence = true;
                     }
-                }catch (IOException e){
-                    e.printStackTrace();
                 }
             }
         };

@@ -9,19 +9,11 @@ import java.util.concurrent.Future;
 
 public class MafiaDoctor extends PlayerHandler {
 
-    private BufferedReader bufferReader;
-    private PrintWriter printWriter;
-    private ExecutorService action;
-    private String name;
     private int selfCounter;
     private MafiaDoctor doc;
 
     public MafiaDoctor(Socket s){
         super(s,Role.MAFIA_DOCTOR);
-        this.name = super.getName();
-        this.bufferReader = super.getBufferReader();
-        this.printWriter = super.getPrintWriter();
-        this.action = super.getAction();
         selfCounter = 0;
         doc = this;
     }
@@ -33,16 +25,16 @@ public class MafiaDoctor extends PlayerHandler {
                 String mafia = "";
                 for(PlayerHandler p : List.list()){
                     if(p.getState().role == Role.GODFATHER){
-                        printWriter.println("Godfather : "+p.getName());
+                        getPrintWriter().println("Godfather : "+p.getName());
                     }
                     else if(p.getState().role == Role.MAFIA){
                         mafia += p.getName()+" ";
                     }
                 }
-                printWriter.println("other mafia are : "+mafia);
+                getPrintWriter().println("other mafia are : "+mafia);
             }
         };
-        action.execute(intro);
+        getAction().execute(intro);
     }
 
     public Future<?> heal(){
@@ -51,11 +43,11 @@ public class MafiaDoctor extends PlayerHandler {
             public void run() {
                 printAlive();
                 try {
-                    printWriter.println("Who do you want to heal ?");
-                    String s= bufferReader.readLine();
+                    getPrintWriter().println("[Server] Who do you want to heal ?");
+                    String s= getBufferReader().readLine();
                     while (getPlayer(s) == null || getPlayer(s).getState().status == Status.DEAD || (getPlayer(s) == doc && selfCounter == 1)){
-                        printWriter.println("invalid name try again");
-                        s = bufferReader.readLine();
+                        getPrintWriter().println("[Server] invalid name try again");
+                        s = getBufferReader().readLine();
                     }
                     if(getPlayer(s).getState().status == Status.SHOT && getPlayer(s) != doc){
                         getPlayer(s).getState().status = Status.ALIVE;
@@ -65,10 +57,12 @@ public class MafiaDoctor extends PlayerHandler {
                         doc.getState().status = Status.ALIVE;
                     }
                 }catch (IOException e){
-                    e.printStackTrace();
+                    System.out.println("Client "+getName()+" connection is lost");
+                    getState().status = Status.DEAD;
+                    getState().silence = true;
                 }
             }
         };
-        return action.submit(heal);
+        return getAction().submit(heal);
     }
 }

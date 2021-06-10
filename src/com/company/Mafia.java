@@ -9,17 +9,10 @@ import java.util.concurrent.Future;
 
 public class Mafia extends PlayerHandler{
 
-    private BufferedReader bufferReader;
-    private PrintWriter printWriter;
-    private ExecutorService action;
-    private String name;
 
     public Mafia(Socket s){
         super(s,Role.MAFIA);
-        this.name = super.getName();
-        this.bufferReader = super.getBufferReader();
-        this.printWriter = super.getPrintWriter();
-        this.action = super.getAction();
+
     }
 
     public Future<?> kill(){
@@ -28,18 +21,19 @@ public class Mafia extends PlayerHandler{
             public void run() {
                 try {
                     printAlive();
-                    printWriter.println("who do you want to kill ?");
+                    getPrintWriter().println("[Server] who do you want to kill ?");
                     String s;
                     while (true){
-                        s = bufferReader.readLine();
+                        s = getBufferReader().readLine();
                         if(getPlayer(s) != null && getPlayer(s).getState().status == Status.ALIVE &&
                                 getPlayer(s).getState().role != Role.GODFATHER &&
                                 getPlayer(s).getState().role != Role.MAFIA &&
                                 getPlayer(s).getState().role != Role.MAFIA_DOCTOR){
                             break;
                         }
-                        printWriter.println("invalid name try again");
+                        getPrintWriter().println("[Server] invalid name try again");
                     }
+                    getPrintWriter().println("[Server] Your recommendation has been sent to Godfather");
                     String m = getName() + " suggests killing "+s;
                     sendMessage(m,getGodfather());
                 }catch (IOException e){
@@ -47,28 +41,28 @@ public class Mafia extends PlayerHandler{
                 }
             }
         };
-        return action.submit(kill);
+        return getAction().submit(kill);
     }
 
     public void mafiaIntro(){
         Runnable intro = new Runnable() {
             @Override
             public void run() {
-                String mafia = "";
+                StringBuilder mafia = new StringBuilder();
                 for(PlayerHandler p : List.list()){
                     if(p.getState().role == Role.GODFATHER){
-                        printWriter.println("Godfather : "+p.getName());
+                        getPrintWriter().println("Godfather : "+p.getName());
                     }
                     else if(p.getState().role == Role.MAFIA_DOCTOR){
-                        printWriter.println("Doctor Lectur : "+p.getName());
+                        getPrintWriter().println("Doctor Lectur : "+p.getName());
                     }
                     else if(p.getState().role == Role.MAFIA){
-                        mafia += p.getName()+" ";
+                        mafia.append(p.getName()).append(" ");
                     }
                 }
-                printWriter.println("other mafia are : "+mafia);
+                getPrintWriter().println("other mafia are : "+mafia);
             }
         };
-        action.execute(intro);
+        getAction().execute(intro);
     }
 }

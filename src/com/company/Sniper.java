@@ -8,18 +8,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class Sniper extends PlayerHandler{
-    private BufferedReader bufferReader;
-    private PrintWriter printWriter;
-    private ExecutorService action;
-    private String name;
+
     private Sniper snip;
 
     public Sniper(Socket s){
         super(s,Role.SNIPER);
-        this.name = super.getName();
-        this.bufferReader = super.getBufferReader();
-        this.printWriter = super.getPrintWriter();
-        this.action = super.getAction();
         snip = this;
     }
 
@@ -28,29 +21,29 @@ public class Sniper extends PlayerHandler{
             @Override
             public void run() {
                 try {
-                    printWriter.println("do you want to shoot someone ?");
-                    String answer = bufferReader.readLine();
+                    getPrintWriter().println("[Server] do you want to shoot someone ?");
+                    String answer = getBufferReader().readLine();
                     if(answer.toUpperCase().equals("YES")){
                         printAlive();
-                        printWriter.println("who do you want to kill");
-                        String s = bufferReader.readLine();
+                        getPrintWriter().println("[Server] who do you want to kill");
+                        String s = getBufferReader().readLine();
                         while (getPlayer(s) == null || getPlayer(s).getState().status == Status.DEAD){
-                            printWriter.println("invalid name try again");
-                            s = bufferReader.readLine();
+                            getPrintWriter().println("[Server] invalid name try again");
+                            s = getBufferReader().readLine();
                         }
                         if(getPlayer(s).getState().role == Role.MAFIA || getPlayer(s).getState().role == Role.MAFIA_DOCTOR || getPlayer(s).getState().role ==Role.GODFATHER){
                             getPlayer(s).getState().status = Status.SHOT;
                         }else {
                             snip.getState().status = Status.SHOT;
                         }
-                    }else {
-                        printWriter.println("Ok maybe next time");
                     }
                 }catch (IOException e){
-                    e.printStackTrace();
+                    System.out.println("Client "+getName()+" connection is lost");
+                    getState().status = Status.DEAD;
+                    getState().silence = true;
                 }
             }
         };
-        return action.submit(shoot);
+        return getAction().submit(shoot);
     }
 }

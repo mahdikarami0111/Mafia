@@ -9,18 +9,10 @@ import java.util.concurrent.Future;
 
 public class Mayor extends PlayerHandler{
 
-    private BufferedReader bufferReader;
-    private PrintWriter printWriter;
-    private ExecutorService action;
-    private String name;
     private boolean cancel;
 
     public Mayor(Socket s){
         super(s,Role.MAYOR);
-        this.name = super.getName();
-        this.bufferReader = super.getBufferReader();
-        this.printWriter = super.getPrintWriter();
-        this.action = super.getAction();
         this.cancel = false;
     }
 
@@ -30,17 +22,19 @@ public class Mayor extends PlayerHandler{
             public void run() {
                 try {
                     cancel = false;
-                    printWriter.println("do you want to cancel voting");
-                    String answer = bufferReader.readLine();
+                    getPrintWriter().println("[Server] do you want to cancel voting");
+                    String answer = getBufferReader().readLine();
                     if(answer.toUpperCase().equals("YES")){
                         cancel = true;
                     }
                 }catch (IOException e){
-                    e.printStackTrace();
+                    System.out.println("Client "+getName()+" connection is lost");
+                    getState().status = Status.DEAD;
+                    getState().silence = true;
                 }
             }
         };
-        return action.submit(verify);
+        return getAction().submit(verify);
     }
 
     public boolean isCancel() {

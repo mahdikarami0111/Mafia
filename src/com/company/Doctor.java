@@ -9,19 +9,12 @@ import java.util.concurrent.Future;
 
 public class Doctor extends PlayerHandler{
 
-    private BufferedReader bufferReader;
-    private PrintWriter printWriter;
-    private ExecutorService action;
-    private String name;
+
     private int selfCounter;
     private Doctor doc;
 
     public Doctor(Socket s){
         super(s,Role.DOCTOR);
-        this.name = super.getName();
-        this.bufferReader = super.getBufferReader();
-        this.printWriter = super.getPrintWriter();
-        this.action = super.getAction();
         selfCounter = 0;
         doc = this;
     }
@@ -32,11 +25,11 @@ public class Doctor extends PlayerHandler{
             public void run() {
                 printAlive();
                 try {
-                    printWriter.println("Who do you want to heal ?");
-                    String s= bufferReader.readLine();
+                    getPrintWriter().println("[Server] Who do you want to heal ?");
+                    String s= getBufferReader().readLine();
                     while (getPlayer(s) == null || getPlayer(s).getState().status == Status.DEAD || (getPlayer(s) == doc && selfCounter == 1)){
-                        printWriter.println("invalid name try again");
-                        s = bufferReader.readLine();
+                        getPrintWriter().println("[Server] invalid name try again");
+                        s = getBufferReader().readLine();
                     }
                     if(getPlayer(s).getState().status == Status.SHOT && getPlayer(s) != doc){
                         getPlayer(s).getState().status = Status.ALIVE;
@@ -46,10 +39,12 @@ public class Doctor extends PlayerHandler{
                         doc.getState().status = Status.ALIVE;
                     }
                 }catch (IOException e){
-                    e.printStackTrace();
+                    System.out.println("Client "+getName()+"'s connection has been lost");
+                    getState().status = Status.DEAD;
+                    getState().silence = true;
                 }
             }
         };
-        return action.submit(heal);
+        return getAction().submit(heal);
     }
 }

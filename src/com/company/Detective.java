@@ -9,17 +9,9 @@ import java.util.concurrent.Future;
 
 public class Detective extends PlayerHandler{
 
-    private BufferedReader bufferReader;
-    private PrintWriter printWriter;
-    private ExecutorService action;
-    private String name;
 
     public Detective(Socket s){
         super(s,Role.DETECTIVE);
-        this.name = super.getName();
-        this.bufferReader = super.getBufferReader();
-        this.printWriter = super.getPrintWriter();
-        this.action = super.getAction();
     }
 
     public Future<?> investigate(){
@@ -28,24 +20,26 @@ public class Detective extends PlayerHandler{
             public void run() {
                 printAlive();
                 try{
-                    printWriter.println("whom do you want to investigate ?");
-                    String s = bufferReader.readLine();
+                    getPrintWriter().println("[Server] whom do you want to investigate ?");
+                    String s = getBufferReader().readLine();
                     while (getPlayer(s).getState().status == Status.DEAD){
-                        printWriter.println("invalid name try again");
-                        s = bufferReader.readLine();
+                        getPrintWriter().println("[Server] invalid name try again");
+                        s = getBufferReader().readLine();
                     }
                     Role role = getPlayer(s).getState().role;
-                    if(role == Role.MAFIA || role == Role.GODFATHER || role == Role.MAFIA_DOCTOR){
-                        printWriter.println("investigation result is positive");
+                    if(role == Role.MAFIA || role == Role.MAFIA_DOCTOR){
+                        getPrintWriter().println("[Server] investigation result is positive");
                     }else {
-                        printWriter.println("investigation result is negative");
+                        getPrintWriter().println("[Server] investigation result is negative");
                     }
 
                 }catch (IOException e){
-                    e.printStackTrace();
+                    System.out.println("[Server] Client "+getName()+" connection is lost");
+                    getState().status = Status.DEAD;
+                    getState().silence = true;
                 }
             }
         };
-        return action.submit(investigate);
+        return getAction().submit(investigate);
     }
 }
