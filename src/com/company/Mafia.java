@@ -7,14 +7,24 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * a class for bulletproof role in mafia game inherits from PlayerHandler also has some role specific features
+ */
 public class Mafia extends PlayerHandler{
 
-
+    /**
+     * constructor for the class calls superclass constructor witha specified role
+     * @param s Socket  player's socket
+     */
     public Mafia(Socket s){
         super(s,Role.MAFIA);
 
     }
 
+    /**
+     * starts a thread running the kill task for mafia player
+     * @return Future  a future object to keep track of the task state
+     */
     public Future<?> kill(){
         Runnable kill = new Runnable() {
             @Override
@@ -44,6 +54,9 @@ public class Mafia extends PlayerHandler{
         return getAction().submit(kill);
     }
 
+    /**
+     * starts a thread and introduces other mafia to the player
+     */
     public void mafiaIntro(){
         Runnable intro = new Runnable() {
             @Override

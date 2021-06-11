@@ -106,8 +106,15 @@ public class MafiaGod {
             sendToAll("OK its day now wake up");
             concludeNight();
             startChatting();
+
+            if(gameOver()){
+                break;
+            }
+
             voting();
         }
+        winner();
+
     }
 
     /**
@@ -117,6 +124,9 @@ public class MafiaGod {
     public boolean gameOver(){
         int mafiaCount = 0;
         int citizenCount = 0;
+        if(godfather.getState().status == Status.DEAD){
+            return true;
+        }
         for(PlayerHandler p :players){
             if(p.getState().status == Status.ALIVE){
                 Role r = p.getState().role;
@@ -126,6 +136,9 @@ public class MafiaGod {
                     citizenCount ++;
                 }
             }
+        }
+        if(mafiaCount == 0){
+            return true;
         }
         return (citizenCount <= mafiaCount);
     }
@@ -139,7 +152,7 @@ public class MafiaGod {
             if(p.getState().status == Status.SHOT){
                 p.getState().status = Status.DEAD;
                 p.getState().silence = true;
-                sendToAll("Last night " +p.getName()+" died, rest in peace my nigga");
+                sendToAll("Last night " +p.getName()+" died");
                 nooneDied = false;
             }
         }
@@ -155,6 +168,7 @@ public class MafiaGod {
         sendToAll("Voting started");
         ArrayList<Future<?>> tasks= new ArrayList<>();
         for (PlayerHandler p : players){
+            p.clear();
             if(p.getState().status == Status.ALIVE){
                 tasks.add(p.vote());
             }
@@ -170,23 +184,31 @@ public class MafiaGod {
                 p.getState().votes = 0;
             }
         }
+        if(max.getState().votes == 0){
+            sendToAll("Nobody voted no body dies");
+            return;
+        }
         sendToAll("Result of voting is : " + max.getName());
+        mayor.clear();
         if(mayor.getState().status == Status.ALIVE){
             sendToAll("Mayor do your job");
             wait(mayor.verify());
 
             if(mayor.isCancel()){
                 sendToAll("Mayor cancelled voting");
+                max.getState().votes = 0;
             }
             else {
                 sendToAll("Mayor did not cancel voting "+max.getName()+" died");
                 max.getState().status = Status.DEAD;
                 max.getState().silence = true;
+                max.getState().votes = 0;
             }
         }else {
             sendToAll(max.getName()+" died");
             max.getState().status = Status.DEAD;
             max.getState().silence = true;
+            max.getState().votes = 0;
         }
     }
 
@@ -194,6 +216,7 @@ public class MafiaGod {
      * calls for Bulletproof role to do its job waits until it ends
      */
     public void bulletDetect(){
+        bulletproof.clear();
         if(bulletproof.getState().status != Status.DEAD){
             sendToAll("Bulletproof wake up");
             wait(bulletproof.deadInvestigate());
@@ -204,6 +227,7 @@ public class MafiaGod {
      * calls for psychologist role to his job waits until done
      */
     public void psychology(){
+        psychologist.clear();
         if(psychologist.getState().status != Status.DEAD){
             sendToAll("Psychologist wake up");
             wait(psychologist.silence());
@@ -214,6 +238,7 @@ public class MafiaGod {
      * calls for detective to do his job waits till he is done
      */
     public void detectiveDetect(){
+        detective.clear();
         if(detective.getState().status != Status.DEAD){
             sendToAll("Detective wake up and investigate");
             wait(detective.investigate());
@@ -224,6 +249,7 @@ public class MafiaGod {
      * calls for doctor to his job waits until done
      */
     public void doctorHeal(){
+        doctor.clear();
         if(doctor.getState().status != Status.DEAD){
             sendToAll("Doctor wake up and heal someone");
             wait(doctor.heal());
@@ -234,6 +260,7 @@ public class MafiaGod {
      * calls for doctor lectur to do his job waits untill done
      */
     public void doctorLectur(){
+        mafiaDoctor.clear();
         if(mafiaDoctor.getState().status != Status.DEAD){
             sendToAll("Doctor Lectur wake up and heal someone");
             wait(mafiaDoctor.heal());
@@ -244,6 +271,7 @@ public class MafiaGod {
      * cals for sniper top do his job waits untill done
      */
     public void sniperShoot(){
+        sniper.clear();
         if(sniper.getState().status != Status.DEAD){
             sendToAll("Sniper wake up");
             wait(sniper.shoot());
@@ -257,6 +285,7 @@ public class MafiaGod {
         sendToAll("Mafia wake up and kill someone");
         ArrayList<Future<?>> tasks = new ArrayList<>();
         for (Mafia m : mafia){
+            m.clear();
             if(m.getState().status == Status.ALIVE){
                 tasks.add(m.kill());
             }
@@ -267,7 +296,7 @@ public class MafiaGod {
     }
 
     /**
-     * introduces the mafia to eachother
+     * introduces the mafia to each other
      */
     public void introduceMafia(){
         for (Mafia m :mafia){
@@ -327,6 +356,7 @@ public class MafiaGod {
         ArrayList<Future<?>> done = new ArrayList<>();
         System.out.println("starting chatting");;
         for(PlayerHandler p : players){
+            p.clear();
             done.add(p.chat());
         }
         try {
@@ -367,6 +397,17 @@ public class MafiaGod {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void winner(){
+        if(godfather.getState().status ==Status.ALIVE){
+            sendToAll("Game is over the winners are the Mafia");
+        }else {
+            sendToAll("Game is over the winners are the citizens");
+        }
+        for(PlayerHandler p :players){
+            sendToAll(p.getName()+" : "+p.getState().role);
         }
     }
 }

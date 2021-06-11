@@ -7,13 +7,23 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * a class for psychologist role in mafia game inherits from PlayerHandler also has some role specific features
+ */
 public class Psychologist extends PlayerHandler{
-
+    /**
+     * constructor for the class class superclass constructor with a specified role (Psychologist)
+     * @param s Socket  player's socket
+     */
     public Psychologist(Socket s){
         super(s,Role.PSYCHOLOGIST);
 
     }
 
+    /**
+     * starts a thread running the silence task for the psychologist player
+     * @return Future  a future object to keep track of the task status
+     */
     public Future<?> silence(){
         Runnable silence = new Runnable() {
             @Override

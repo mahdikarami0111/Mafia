@@ -7,15 +7,26 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * a class for sniper role in mafia game inherits from PlayerHandler also has some role specific features
+ */
 public class Sniper extends PlayerHandler{
 
     private Sniper snip;
 
+    /**
+     * constructor for the class class superclass constructor witha  specified role
+     * @param s Socket  player's socket
+     */
     public Sniper(Socket s){
         super(s,Role.SNIPER);
         snip = this;
     }
 
+    /**
+     * starts a thread running the shooting task for sniper player
+     * @return Future  a future object to keep track of thetask
+     */
     public Future<?> shoot(){
         Runnable shoot = new Runnable() {
             @Override

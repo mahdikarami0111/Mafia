@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -76,13 +77,13 @@ public class PlayerHandler {
      * prints all alive players for the player
      */
     public void printAlive(){
-        StringBuilder s = new StringBuilder();
+        ArrayList<String> alive = new ArrayList<>();
         for(PlayerHandler p : List.list()){
             if(p.getState().status == Status.ALIVE || p.getState().status == Status.SHOT){
-                s.append(p.getName());
+                alive.add(p.getName());
             }
         }
-        printWriter.println("[ "+s+" ]");
+        printWriter.println("Alive : "+alive);
     }
 
     /**
@@ -155,7 +156,7 @@ public class PlayerHandler {
                         p.getState().votes +=1;
 
                         printWriter.println("[Server] your voting will end in 10 seconds");
-                        printWriter.println("[Server] do you want to change your vote ?");
+                        printWriter.println("[Server] if you want to change your vote type in name of the person yo want to change to");
                         Thread.sleep(10000);
                         if(bufferReader.ready()){
                             p.getState().votes -= 1;
@@ -165,6 +166,7 @@ public class PlayerHandler {
                                 printWriter.println("Invalid name try again");
                                 p = getPlayer(bufferReader.readLine());
                             }
+                            printWriter.println("vote changed successfully");
                             sendMessage("changed his vote for : "+p.getName());
                             p.getState().votes +=1;
                         }
@@ -302,6 +304,19 @@ public class PlayerHandler {
             silence = false;
         }
 
+    }
+
+    /**
+     * clears data stream to avoid unwanted input also chekcs if the player wants to quit
+     */
+    public void clear(){
+        try {
+            while (bufferReader.ready()){
+               bufferReader.readLine();
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public BufferedReader getBufferReader() {

@@ -8,13 +8,23 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * a class for godfather role in mafia game inherits from PlayerHandler also has some role specific features
+ */
 public class Godfather extends PlayerHandler{
 
-
+    /**
+     * constructor of the class calls super class constructor with the specified role
+     * @param s Socket  player's socket
+     */
     public Godfather(Socket s){
         super(s,Role.GODFATHER);
     }
 
+    /**
+     * starts a thread running the killing task for godfather player
+     * @return Future  a future object to keep track of the task state
+     */
     public Future<?> kill(){
        Runnable kill = new Runnable() {
            @Override
@@ -53,6 +63,9 @@ public class Godfather extends PlayerHandler{
        return getAction().submit(kill);
     }
 
+    /**
+     * runs an introduction task for godfather introducing other mafias to him
+     */
     public void mafiaIntro(){
         Runnable intro = new Runnable() {
             @Override

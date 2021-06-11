@@ -7,18 +7,29 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * a class for doctor role in mafia game inherits from PlayerHandler also has some role specific features
+ */
 public class Doctor extends PlayerHandler{
 
 
     private int selfCounter;
     private Doctor doc;
 
+    /**
+     * constructor for the class calls the super class constructor
+     * @param s Socket  player's socket
+     */
     public Doctor(Socket s){
         super(s,Role.DOCTOR);
         selfCounter = 0;
         doc = this;
     }
 
+    /**
+     * starts a thread to run the heal task for the player
+     * @return Future  a future object to keep track of the task current state
+     */
     public Future<?> heal(){
         Runnable heal = new Runnable() {
             @Override

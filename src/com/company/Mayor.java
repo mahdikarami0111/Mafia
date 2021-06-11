@@ -7,15 +7,26 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * a class for Mayor role in mafia game inherits from PlayerHandler also has some role specific features
+ */
 public class Mayor extends PlayerHandler{
 
     private boolean cancel;
 
+    /**
+     * constructor for the class calls the superclass constructor with the specified role
+     * @param s Socket  player's socket
+     */
     public Mayor(Socket s){
         super(s,Role.MAYOR);
         this.cancel = false;
     }
 
+    /**
+     * starts a thread running the vote cancellation task for the mayor player
+     * @return Future  a future object to keep track of the threads status
+     */
     public Future<?> verify(){
         Runnable verify = new Runnable() {
             @Override
