@@ -10,7 +10,7 @@ public class Client {
     public static void main(String[] args) {
         try {
             BufferedReader keyboard =new BufferedReader(new InputStreamReader(System.in));
-            Socket client = new Socket("localhost",Integer.parseInt(keyboard.readLine()));
+            Socket client = new Socket("localhost",8080);
             BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
             PrintWriter writer = new PrintWriter(client.getOutputStream(),true);
             ClientReader clientReader = new ClientReader(reader);

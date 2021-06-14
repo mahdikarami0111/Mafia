@@ -50,7 +50,7 @@ public class Doctor extends PlayerHandler{
                         doc.getState().status = Status.ALIVE;
                     }
                 }catch (IOException e){
-                    System.out.println("Client "+getName()+"'s connection has been lost");
+                    System.out.println("Client "+getName()+" connection has been lost");
                     getState().status = Status.DEAD;
                     getState().silence = true;
                 }

@@ -45,7 +45,7 @@ public class Detective extends PlayerHandler{
                     }
 
                 }catch (IOException e){
-                    System.out.println("[Server] Client "+getName()+" connection is lost");
+                    System.out.println("Client "+getName()+" connection is lost");
                     getState().status = Status.DEAD;
                     getState().silence = true;
                 }

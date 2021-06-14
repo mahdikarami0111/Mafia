@@ -62,6 +62,7 @@ public class PlayerHandler {
         }
     }
 
+
     /**
      * sends a message to all other players other players will not know who sent the message
      * @param m String  message to be sent
@@ -185,6 +186,27 @@ public class PlayerHandler {
      * starts chatting process for the player
      * @return Future<?>  a future object to keep track of the chat thread
      */
+    /**
+     *
+     * gets a verification from players to start the day
+     * @return Future  a future object to keep track of the task
+     */
+    public Future<?> endNight(){
+       Runnable r = new Runnable() {
+           @Override
+           public void run() {
+               try {
+                   printWriter.println("[Server] ok give me a verification so we can start the day");
+                   bufferReader.readLine();
+               } catch (IOException e) {
+                   state.status = Status.DEAD;
+                   state.silence = true;
+               }
+           }
+       };
+       return action.submit(r);
+    }
+
     public Future<?> chat(){
         Runnable chat = new Runnable() {
             @Override

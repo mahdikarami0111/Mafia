@@ -105,6 +105,9 @@ public class MafiaGod {
             detectiveDetect();
             sendToAll("OK its day now wake up");
             concludeNight();
+            if(gameOver()){
+                break;
+            }
             startChatting();
 
             if(gameOver()){
@@ -147,6 +150,15 @@ public class MafiaGod {
      * concludes the night kills players who ahve been shot and not healed
      */
     public void concludeNight(){
+        ArrayList<Future<?>> tasks= new ArrayList<>();
+        for (PlayerHandler p : players){
+            tasks.add(p.endNight());
+        }
+        wait(tasks);
+        if(gameOver()){
+            return;
+        }
+
         boolean nooneDied = true;
         for (PlayerHandler p : players){
             if(p.getState().status == Status.SHOT){
