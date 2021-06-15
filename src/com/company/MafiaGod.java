@@ -152,7 +152,9 @@ public class MafiaGod {
     public void concludeNight(){
         ArrayList<Future<?>> tasks= new ArrayList<>();
         for (PlayerHandler p : players){
-            tasks.add(p.endNight());
+            if(p.getState().status != Status.DEAD){
+                tasks.add(p.endNight());
+            }
         }
         wait(tasks);
         if(gameOver()){
@@ -366,7 +368,6 @@ public class MafiaGod {
         }
         sendToAll("Chatting started");
         ArrayList<Future<?>> done = new ArrayList<>();
-        System.out.println("starting chatting");;
         for(PlayerHandler p : players){
             p.clear();
             done.add(p.chat());
@@ -377,7 +378,6 @@ public class MafiaGod {
             e.printStackTrace();
         }
         for(Future<?> f : done){
-            System.out.println("Ending chats");
             f.cancel(true);
         }
     }
